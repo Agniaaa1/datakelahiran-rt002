@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Halaman Kelahiran Bu RT</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f7f6;
+            padding: 20px;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        h1, h2 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+
+        p {
+            margin-bottom: 20px;
+        }
+
+        form {
+            background-color: #ffffff;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            max-width: 600px; /* Batasi lebar form */
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        form label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+
+        form input[type="text"],
+        form input[type="date"],
+        form input[type="number"],
+        form select {
+            width: calc(100% - 20px); /* Kurangi padding */
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+
+        form button[type="submit"] {
+            background-color: #007bff; /* Biru */
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+            transition: background-color 0.3s ease;
+        }
+
+        form button[type="submit"]:hover {
+            background-color: #0056b3;
+        }
+
+        hr {
+            border: 0;
+            border-top: 1px solid #eee;
+            margin: 40px 0;
+        }
+
+        #searchInput {
+            width: calc(100% - 20px);
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 16px;
+            display: block; /* Pastikan input cari di baris sendiri */
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background-color: #ffffff;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        table th, table td {
+            border: 1px solid #e0e0e0;
+            padding: 12px 15px;
+            text-align: left;
+        }
+
+        table th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+            cursor: pointer; /* Menandakan bisa disortir */
+        }
+
+        table th:hover {
+            background-color: #e6e6e6;
+        }
+
+        table tbody tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        table tbody tr:hover {
+            background-color: #f1f1f1;
+        }
+
+        table button {
+            padding: 6px 10px;
+            margin-right: 5px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s ease;
+        }
+
+        table button:hover {
+            opacity: 0.9;
+        }
+
+        table button:first-child { /* Edit Button */
+            background-color: #ffc107; /* Kuning */
+            color: #333;
+        }
+
+        table button:last-child { /* Delete Button */
+            background-color: #dc3545; /* Merah */
+            color: white;
+        }
+
+        #exportCsvBtn, #clearAllDataButton {
+            background-color: #4CAF50; /* Hijau */
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 15px;
+            display: inline-block;
+            margin: 10px 5px;
+            transition: background-color 0.3s ease;
+        }
+
+        #exportCsvBtn:hover, #clearAllDataButton:hover {
+            background-color: #45a049;
+        }
+
+        #notification {
+            display: none;
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #4CAF50; /* Default green */
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            z-index: 1000;
+            font-size: 16px;
+            text-align: center;
+        }
+
+        /* MEDIA QUERIES UNTUK RESPONSIVITAS DI HP */
+        @media screen and (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            h1, h2 {
+                font-size: 1.5em; /* Ukuran font lebih kecil untuk judul */
+            }
+
+            form {
+                padding: 15px;
+            }
+
+            form input[type="text"],
+            form input[type="date"],
+            form input[type="number"],
+            form select,
+            #searchInput {
+                width: calc(100% - 10px); /* Sesuaikan lebar di HP */
+                padding: 8px;
+                font-size: 14px;
+            }
+
+            table {
+                display: block; /* Membuat tabel bisa di-scroll secara horizontal */
+                overflow-x: auto;
+                white-space: nowrap; /* Mencegah teks di sel pecah baris */
+                -webkit-overflow-scrolling: touch; /* Untuk scrolling yang mulus di iOS */
+            }
+
+            table thead, table tbody, table th, table td, table tr {
+                display: block; /* Membuat setiap bagian tabel menjadi blok */
+            }
+
+            table th {
+                text-align: center; /* Rata tengah header di HP */
+                padding: 10px 5px;
+                min-width: 100px; /* Agar ada lebar minimum */
+            }
+
+            table td {
+                text-align: center; /* Rata tengah konten di HP */
+                padding: 8px 5px;
+                min-width: 100px; /* Agar ada lebar minimum */
+            }
+
+            /* Untuk sel aksi, agar tombol tidak terlalu sempit */
+            table td:last-child {
+                display: flex;
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="notification">
+        Pesan Notifikasi
+    </div>
+    <h1>Data Kelahiran Lingkungan I Ciriung Kelurahan Ciriung RT.002/RW.03</h1>
+    <p>Selamat datang, Bu RT! Ini adalah aplikasi pendataan kelahiran dengan database terpusat.</p>
+
+    <h2>Tambahkan Data Kelahiran Baru:</h2>
+    <form>
+        <label for="namaBayi">Nama Bayi:</label>
+        <input type="text" id="namaBayi" name="namaBayi" required><br>
+
+        <label for="tanggalLahir">Tanggal Lahir:</label>
+        <input type="date" id="tanggalLahir" name="tanggalLahir" required><br>
+
+        <label for="jenisKelamin">Jenis Kelamin:</label>
+        <select id="jenisKelamin" name="jenisKelamin" required>
+            <option value="">Pilih</option>
+            <option value="laki-laki">Laki-laki</option>
+            <option value="perempuan">Perempuan</option>
+        </select><br>
+
+        <label for="anakKe">Anak ke-:</label>
+        <input type="number" id="anakKe" name="anakKe" min="1" max="15" value="1" required><br>
+
+        <label for="beratBadan">Berat Badan Lahir (gram):</label>
+        <input type="number" id="beratBadan" name="beratBadan" min="100" max="6000" step="10" required><br>
+
+        <label for="panjangBadan">Panjang Badan Lahir (cm):</label>
+        <input type="number" id="panjangBadan" name="panjangBadan" min="20" max="80" step="0.1" required><br>
+        <button type="submit">Simpan Data</button>
+    </form>
+
+    <hr>
+
+    <h2>Daftar Data Kelahiran:</h2>
+
+    <div style="text-align: center;">
+        <label for="searchInput">Cari Data:</label>
+        <input type="text" id="searchInput" placeholder="Ketik nama bayi, tanggal lahir, jenis kelamin, dll.">
+    </div>
+
+    <table border="1">
+        <thead>
+            <tr>
+                <th id="sortNamaBayi">Nama Bayi</th>
+                <th id="sortTanggalLahir">Tanggal Lahir</th>
+                <th id="sortJenisKelamin">Jenis Kelamin</th>
+                <th id="sortAnakKe">Anak ke-</th>
+                <th id="sortBeratBadan">Berat Badan (g)</th>
+                <th id="sortPanjangBadan">Panjang Badan (cm)</th>
+                <th>Aksi</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr id="noDataRow">
+                <td colspan="7" style="text-align: center; color: #888; font-style: italic;">Tidak ada data kelahiran yang terdaftar.</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div style="margin-top: 20px; text-align: center;">
+        <button id="exportCsvBtn">Ekspor Data ke CSV</button>
+        </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
