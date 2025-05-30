@@ -1,5 +1,4 @@
 // Konfigurasi Firebase Anda (PASTIKAN INI SESUAI DENGAN PUNYAMU DARI KONSOL FIREBASE)
-// Ini adalah contoh, GANTI DENGAN CONFIG PUNYAMU
 const firebaseConfig = {
   apiKey: "AIzaSyD4A6n_U7wZZgBHvuyaveEtthfqypXdzTQ",
   authDomain: "datakelahiranrt002rw03.firebaseapp.com",
@@ -57,11 +56,12 @@ function displayData(documents) {
     let hasData = false;
 
     if (documents.length > 0) {
-        documents.forEach(doc => {
+        documents.forEach(item => { // Perubahan di sini: 'doc' menjadi 'item'
             hasData = true;
-            const data = doc.data();
+            const data = item.data; // Perubahan di sini: 'item.data' bukan 'item.data()'
+            const docId = item.id;   // Ambil ID dari 'item.id'
             const tr = document.createElement('tr');
-            tr.setAttribute('data-id', doc.id); // Simpan ID dokumen di baris tabel
+            tr.setAttribute('data-id', docId); // Gunakan docId yang baru
 
             tr.innerHTML = `
                 <td>${data.namaBayi}</td>
@@ -95,10 +95,10 @@ function fetchData() {
         .onSnapshot(snapshot => {
             const documents = [];
             snapshot.forEach(doc => {
-                documents.push({ id: doc.id, data: doc.data() });
+                documents.push({ id: doc.id, data: doc.data() }); // Di sini kita membungkus data
             });
             displayData(documents); // Tampilkan data yang sudah difilter
-            // Tidak perlu memanggil updateStatistics di sini karena sudah dipanggil di displayData
+            // updateStatistics sudah dipanggil di displayData, jadi tidak perlu panggil lagi di sini.
         }, error => {
             console.error("Error fetching documents: ", error);
             showNotification('Gagal mengambil data dari database.', 'error');
@@ -114,18 +114,19 @@ function updateStatistics(documents) {
     let totalPanjangBadan = 0;
 
     documents.forEach(doc => {
-        const data = doc.data();
+        const data = doc.data; // Perubahan di sini: 'doc.data' bukan 'doc.data()'
         if (data.jenisKelamin === 'laki-laki') {
             totalLakiLaki++;
         } else if (data.jenisKelamin === 'perempuan') {
             totalPerempuan++;
         }
 
-        if (typeof data.beratBadan === 'number') {
-            totalBeratBadan += data.beratBadan;
+        // Pastikan data numerik valid sebelum dihitung
+        if (!isNaN(parseFloat(data.beratBadan))) {
+            totalBeratBadan += parseFloat(data.beratBadan);
         }
-        if (typeof data.panjangBadan === 'number') {
-            totalPanjangBadan += data.panjangBadan;
+        if (!isNaN(parseFloat(data.panjangBadan))) {
+            totalPanjangBadan += parseFloat(data.panjangBadan);
         }
     });
 
@@ -149,10 +150,10 @@ form.addEventListener('submit', async function(event) {
     const jenisKelaminInput = document.getElementById('jenisKelamin');
     const anakKeInput = document.getElementById('anakKe');
     const beratBadanInput = document.getElementById('beratBadan');
-    const panjangBadanInput = document.getElementById('panjangBadan'); // Sudah diperbaiki typonya
+    const panjangBadanInput = document.getElementById('panjangBadan');
 
     const namaBayi = namaBayiInput.value.trim();
-    const tanggalLahir = tanggalLahirInput.value; // Format YYYY-MM-DD
+    const tanggalLahir = tanggalLahirInput.value;
     const jenisKelamin = jenisKelaminInput.value;
     const anakKe = parseInt(anakKeInput.value);
     const beratBadan = parseFloat(beratBadanInput.value);
@@ -214,7 +215,7 @@ tbody.addEventListener('click', async function(event) {
         try {
             const doc = await collectionRef.doc(docId).get();
             if (doc.exists) {
-                const data = doc.data();
+                const data = doc.data(); // Di sini tetap 'doc.data()' karena 'doc' adalah objek dokumen Firestore asli
                 document.getElementById('namaBayi').value = data.namaBayi;
                 document.getElementById('tanggalLahir').value = data.tanggalLahir;
                 document.getElementById('jenisKelamin').value = data.jenisKelamin;
@@ -260,8 +261,8 @@ searchInput.addEventListener('keyup', function() {
         return;
     }
 
+    let hasMatch = false;
     rows.forEach(row => {
-        // Skip the 'noDataRow' if it exists
         if (row.id === 'noDataRow') {
             row.style.display = 'none'; // Pastikan noDataRow selalu tersembunyi saat ada pencarian
             return;
@@ -274,18 +275,15 @@ searchInput.addEventListener('keyup', function() {
                 match = true;
             }
         });
-        row.style.display = match ? '' : 'none'; // Tampilkan jika cocok, sembunyikan jika tidak
-    });
-
-    // Cek apakah ada data yang cocok setelah filter
-    let anyVisibleRow = false;
-    rows.forEach(row => {
-        if (row.id !== 'noDataRow' && row.style.display !== 'none') {
-            anyVisibleRow = true;
+        if (match) {
+            row.style.display = ''; // Tampilkan
+            hasMatch = true;
+        } else {
+            row.style.display = 'none'; // Sembunyikan
         }
     });
 
-    if (!anyVisibleRow) {
+    if (!hasMatch) {
         noDataRow.style.display = 'table-row'; // Tampilkan 'Tidak ada data' jika tidak ada yang cocok
         noDataRow.querySelector('td').textContent = 'Tidak ada data yang cocok dengan pencarian Anda.';
     } else {
@@ -304,14 +302,23 @@ document.querySelectorAll('th[id^="sort"]').forEach(header => {
         const columnId = this.id;
         const columnName = columnId.replace('sort', '').toLowerCase(); // namaBayi, tanggalLahir, dll.
 
-        if (currentSortColumn === columnName) {
+        // Adjust column names for sorting if they differ from Firestore field names
+        let firestoreFieldName = columnName;
+        if (columnName === 'namabayi') firestoreFieldName = 'namaBayi';
+        if (columnName === 'tanggallahir') firestoreFieldName = 'tanggalLahir';
+        if (columnName === 'jeniskelamin') firestoreFieldName = 'jenisKelamin';
+        if (columnName === 'anakke-') firestoreFieldName = 'anakKe'; // Sesuaikan jika ada "-" di ID
+        if (columnName === 'beratbadan') firestoreFieldName = 'beratBadan';
+        if (columnName === 'panjangbadan') firestoreFieldName = 'panjangBadan';
+        
+        if (currentSortColumn === firestoreFieldName) {
             sortDirection = (sortDirection === 'asc') ? 'desc' : 'asc';
         } else {
-            currentSortColumn = columnName;
+            currentSortColumn = firestoreFieldName;
             sortDirection = 'asc';
         }
 
-        sortData(columnName, sortDirection);
+        sortData(firestoreFieldName, sortDirection);
     });
 });
 
@@ -372,6 +379,7 @@ function createClearAllDataButton() {
     const clearButton = document.createElement('button');
     clearButton.id = 'clearAllDataButton';
     clearButton.textContent = 'Hapus Semua Data';
+    clearButton.classList.add('clear-all-btn'); // Tambahkan kelas untuk styling (opsional)
     containerDiv.appendChild(clearButton);
 
     clearButton.addEventListener('click', async function() {
@@ -402,8 +410,3 @@ document.addEventListener('DOMContentLoaded', function() {
     // Buat tombol hapus semua data
     createClearAllDataButton();
 });
-
-// --- Setup Event Listeners (Dipanggil setelah DOMContentLoaded) ---
-// Note: Event listeners untuk form dan tombol edit/delete sudah di luar DOMContentLoaded,
-// ini adalah cara yang valid juga. Tapi untuk konsistensi, bisa saja dimasukkan ke sini.
-// Namun, biarkan seperti ini agar tidak perlu banyak perubahan.
